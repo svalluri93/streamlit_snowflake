@@ -36,7 +36,5 @@ if uploaded_file is not None:
 
 
 
-video_file = open('C:\\Users\suryavalluri\Downloads\Snowflake_training_part_3-20221221_090615-Meeting_Recording.mp4', 'rb')
-video_bytes = video_file.read()
-st.video(video_bytes)
+
 
