@@ -5,6 +5,8 @@ import csv
 import pandas
 import os
 from tqdm import tqdm
+import re
+
 
 openai.api_key = st.secrets["openai"]["OPENAI_API_KEY"]
 
@@ -26,6 +28,14 @@ def chat(system, user_assistant):
   assert status_code == "stop", f"The status code was {status_code}."
   return response["choices"][0]["message"]["content"]
 
+def pii_redact(input):
+
+    pat1 = r'[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+.com' #email
+    pat2 = r'[A-Z]{5}[0-9]{4}[A-Z]{1}'            #PAN number
+    pat3 = r'[0-9]'                               #phone number, aadhar , amount , date, policy number
+    combined_pat = r'|'.join((pat1, pat2, pat3))
+    redact_out = re.sub(combined_pat,'',input)
+    return redact_out
 
 def translate(df):
         
@@ -34,17 +44,18 @@ def translate(df):
         processed_rows = 0
         #for index, row in df.iterrows():
         for index, row in tqdm(df.iterrows(), total=len(df)):
-            input_line = row['INPUT']
-            response_fn_test = chat(''' You are a language translator. If the input sentence belongs to english language then do not translate it.
+            input_line = pii_redact(row['INPUT'])
+            response_fn_test = chat(''' You are a language translator. If the input sentence belongs to english language then strictly do not translate it.
             Don’t justify your answers. Don’t give information not mentioned in the CONTEXT INFORMATION.
              Don't give subheadings. only provide translated output''',['''translate the statement - ''' + '''"''' + input_line + '''"'''+ '''. 
          '''])
             #st.write(f"translated output: {response_fn_test}")
             #row['TRANSLATION'] = response_fn_test
+            df.at[index, 'REDACTED_INPUT'] = input_line
             df.at[index, 'TRANSLATION'] = response_fn_test.replace('"', '')
             processed_rows += 1
             progress_bar.progress((index + 1) / len(df))
-            status_count.write(f"Processing row {processed_rows}/{len(df)}")
+            status_count.write(f"Translating row {processed_rows}/{len(df)}")
         progress_bar.empty()
         status_count.empty()
 
@@ -58,7 +69,7 @@ def classify(df):
         processed_rows = 0
         #for index, row in df.iterrows():
         for index, row in tqdm(df.iterrows(), total=len(df)):
-            input_line = row['INPUT']
+            input_line = pii_redact(row['INPUT'])
             response_fn_test = chat(''' You are a language classifier.
         below are the only list of categories available to you and you must only use any one of the below categories to classify:
         1.) Acknowledgement/non receipt of statement
@@ -93,7 +104,7 @@ def classify(df):
             df.at[index, 'CATEGORY'] = response_fn_test.replace('"', '')
             processed_rows += 1
             progress_bar.progress((index + 1) / len(df))
-            status_count.write(f"Processing row {processed_rows}/{len(df)}")
+            status_count.write(f"Classifying row {processed_rows}/{len(df)}")
         progress_bar.empty()
         status_count.empty()
         #st.write(df2)
@@ -131,8 +142,9 @@ def main():
     if button_pressed:
         df2 = translate(df)
         st.write(df2)
-        st.download_button(label="Download", data=df2.to_csv(index=False,encoding='utf-8-sig'), file_name='classified_ouput.csv')
-        #st.download_button(label="Download", data=df2.to_csv('classify_output.csv', encoding='utf-8-sig', index=False),mime='text/csv')
+        col_name = u'\ufeff' + 'INPUT'
+        df2.rename(columns={'INPUT': col_name}, inplace=True)
+        st.download_button(label="Download", data=df2.to_csv(index=False,encoding='utf-8-sig'), file_name='classified_ouput.csv')        
 
 if __name__ == "__main__":
     main()

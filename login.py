@@ -1,6 +1,8 @@
 import streamlit as st
 import snowflake.connector
 
+
+
 @st.cache_resource(show_spinner=False)
 def init_connection():
     return snowflake.connector.connect(
@@ -32,6 +34,8 @@ def authenticate(username, password):
         return False
 def main():
 # Login form
+    
+    st.set_page_config(layout="wide")
     
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
