@@ -32,11 +32,17 @@ def authenticate(username, password):
         return True
     else:
         return False
+    
+
 def main():
 # Login form
     
-    st.set_page_config(layout="wide")
-    
+    st.set_page_config(
+    layout="wide",
+    page_title="classifAIr",
+    page_icon="💡",
+    )
+    st.image('./images/logo-removebg-preview.png')
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
 
@@ -47,7 +53,7 @@ def main():
             st.success("Login successful!")
         # Display the content after successful login
             st.session_state["login_token"] = True
-            st.write("You can now navigate to classifier page!")
+            st.write("You can now navigate to classifAIr page!")
 
         else:
             st.error("Invalid credentials. Please try again.")
