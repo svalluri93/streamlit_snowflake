@@ -166,33 +166,35 @@ def main():
         st.stop()
 
     # File upload section
-    uploaded_file = st.file_uploader("Upload a file csv/txt", type=["csv","txt"])
+    inp_uploaded_file = st.file_uploader("Upload a file csv/txt", type=["csv","txt"],key="InpFile")
 
     # Display file content
-    if uploaded_file is not None:
+    if inp_uploaded_file is not None:
         try:
             choice = st.radio("Header present in file?", ("Yes", "No"))
             if choice == 'Yes':
-                df = pd.read_csv(uploaded_file,header=0,names=["INPUT"])
+                inp_df = pd.read_csv(inp_uploaded_file,header=0,names=["INPUT"])
                 st.text("File Contents:")
-                st.write(df)
+                st.write(inp_df)
             else:
-                df = pd.read_csv(uploaded_file,names=["INPUT"])
+                inp_df = pd.read_csv(inp_uploaded_file,names=["INPUT"])
                 st.text("File Contents:")
-                st.write(df)
-                
+                st.write(inp_df)                
         except Exception as e:
             st.error(f"Error: {e}")
-    
+
     button_pressed = st.button("Translate & Classify")
 
     if button_pressed:
         try:
-            df2 = translate(df)
-            st.write(df2)
-            col_name = u'\ufeff' + 'INPUT'
-            df2.rename(columns={'INPUT': col_name}, inplace=True)
-            st.download_button(label="Download", data=df2.to_csv(index=False,encoding='utf-8-sig'), file_name='classified_ouput.csv')
+            #df2 = translate(inp_df)
+            #st.write(df2)
+            #col_name = u'\ufeff' + 'INPUT'
+            #df2.rename(columns={'INPUT': col_name}, inplace=True)
+            #st.download_button(label="Download", data=df2.to_csv(index=False,encoding='utf-8-sig'), file_name='classified_ouput.csv')
+            cat_read_df = st.session_state.get("categories_df")
+            cat_list = cat_read_df["CATEGORY_NAME"].tolist()
+            st.text(cat_list)
                 
         except UnboundLocalError as e:
             st.error('Please upload a file before proceeding')

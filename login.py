@@ -27,9 +27,11 @@ def authenticate(username, password):
     rows = run_query(query)
 
     if len(rows) > 0:
-        #for row in rows:
+        for row in rows:
             #st.write(f"{row[0]} has a :{row[1]}:")
-        return True
+            role = row[2]
+            st.write("role is ",role)
+        return True,role
     else:
         return False
     
@@ -49,11 +51,13 @@ def main():
 # Check if login button is clicked
     if st.button("Login"):
     # Call the authenticate function
-        if authenticate(username, password):
-            st.success("Login successful!")
+        login_token, role = authenticate(username, password)
+        if login_token:
+            st.success("Login successful, navigate to categories page and get started!")
         # Display the content after successful login
             st.session_state["login_token"] = True
-            st.write("You can now navigate to classifAIr page!")
+            st.session_state["role"] = role
+            
 
         else:
             st.error("Invalid credentials. Please try again.")
