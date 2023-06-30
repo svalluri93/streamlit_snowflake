@@ -30,7 +30,7 @@ def authenticate(username, password):
         for row in rows:
             #st.write(f"{row[0]} has a :{row[1]}:")
             role = row[2]
-            st.write("role is ",role)
+            #st.write("role is ",role)
         return True,role
     else:
         return False
