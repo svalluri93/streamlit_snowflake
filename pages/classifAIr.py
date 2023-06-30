@@ -71,7 +71,7 @@ def detect_lang(df):
 
     return df
 
-def translate(df):
+def translate(df,cat_list):
         lang_detected_df = detect_lang(df)
         progress_bar = st.progress(0)
         status_count = st.empty()
@@ -97,11 +97,11 @@ def translate(df):
         progress_bar.empty()
         status_count.empty()
         #st.write(lang_detected_df)
-        df_final = classify(lang_detected_df)
+        df_final = classify(lang_detected_df,cat_list)
         #st.write(df)
         return df_final
 
-def classify(df):
+def classify(df,cat_list):
         progress_bar = st.progress(0)
         status_count = st.empty()
         processed_rows = 0
@@ -112,30 +112,8 @@ def classify(df):
             else:
                 input_line = row['TRANSLATION']
             response_fn_test = chat(''' You are a language classifier.
-        below are the only list of categories available to you and you must only use any one of the below categories to classify:
-         [Acknowledgement/non receipt of statement,
-         Alteration/modification required,
-         Auto debit activated without customer consent,
-         Auto debit deactivated without customer consent,
-         Dissatisfied with alternate mode of payment,
-         Dissatisfied with renewal premium payment procedure,
-         Dissatisfied with repetative calls/SMS,
-         Dissatisfied with Repetative calls / SMS,
-         Grievance pertaining to Online premium payment ,
-         Happy with Branch/bank staff,
-         Happy with communication service,
-         Happy with Agent Service,
-         Happy with Plan/product features,
-         Happy with advance intimation of Renewal premium payment,
-         Happy with Easy Premium payment options,
-         Happy with Hassle free premium payment process,
-         Service deficiency at branch/bank,
-         Website is not working,
-         Unit Statement Required,
-         Unhappy with mandate/bank charges,
-         Satisfied with Overall services] 
-
-       only provide classified category name as output along with confidence score ranging 
+        below are the only list of categories available to you and you must only use any one of the below categories to classify: [''' + ', '.join(cat_list) + '''] 
+         only provide classified category name as output along with confidence score ranging 
         from 0 to 1.output should be like - [category_name,confidence_score]. If statement cannot be classified give output as "unknown".
         Don’t justify your answers.Don't give subheadings. Don’t give information not mentioned in the CONTEXT INFORMATION.
         
@@ -187,14 +165,15 @@ def main():
 
     if button_pressed:
         try:
-            #df2 = translate(inp_df)
-            #st.write(df2)
-            #col_name = u'\ufeff' + 'INPUT'
-            #df2.rename(columns={'INPUT': col_name}, inplace=True)
-            #st.download_button(label="Download", data=df2.to_csv(index=False,encoding='utf-8-sig'), file_name='classified_ouput.csv')
             cat_read_df = st.session_state.get("categories_df")
             cat_list = cat_read_df["CATEGORY_NAME"].tolist()
-            st.text(cat_list)
+            #st.text(cat_list)
+            df2 = translate(inp_df,cat_list)
+            st.write(df2)
+            col_name = u'\ufeff' + 'INPUT'
+            df2.rename(columns={'INPUT': col_name}, inplace=True)
+            st.download_button(label="Download", data=df2.to_csv(index=False,encoding='utf-8-sig'), file_name='classified_ouput.csv')
+
                 
         except UnboundLocalError as e:
             st.error('Please upload a file before proceeding')
