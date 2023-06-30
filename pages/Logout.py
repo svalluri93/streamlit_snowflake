@@ -11,6 +11,7 @@ def main():
         logout_button_pressed = st.button("Logout")
         if logout_button_pressed:
             st.session_state["login_token"] = False
+            st.success("Logout successful")
 
 if __name__ == "__main__":
     main()
