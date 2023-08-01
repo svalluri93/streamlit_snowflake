@@ -2,8 +2,7 @@ import openai
 import re
 import streamlit as st
 import pandas as pd
-#from prompts import get_system_prompt
-#from multi_table_prompt import get_cols
+
 
 GEN_SQL = """
 You will be acting as an AI Snowflake SQL expert named GenSQL.
@@ -120,4 +119,5 @@ if __name__ == "__main__":
                 session = st.experimental_connection("snowpark").session
                 message["results"] = pd.DataFrame(session.sql(sql).collect())
                 st.dataframe(message["results"])
+                st.session_state["GenSQL_op_df"] = message["results"]
             st.session_state.messages.append(message)
