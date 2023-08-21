@@ -66,6 +66,7 @@ snowflake-connector-python==3.0.4
 snowflake-snowpark-python==1.5.1
 sortedcontainers==2.4.0
 streamlit==1.25.0
+streamlit-option-menu==0.3.6
 tenacity==8.2.2
 toml==0.10.2
 toolz==0.12.0
