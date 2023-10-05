@@ -8,6 +8,7 @@ from langchain.llms import OpenAI
 from langchain.callbacks import get_openai_callback
 
 
+openai_api_key = st.secrets["openai"]["OPENAI_API_KEY"]
 
 
 def process_text(text):
@@ -21,7 +22,7 @@ def process_text(text):
     chunks = text_splitter.split_text(text)
     
     # Convert the chunks of text into embeddings to form a knowledge base
-    embeddings = OpenAIEmbeddings()
+    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
     knowledgeBase = FAISS.from_texts(chunks, embeddings)
     
     return knowledgeBase
@@ -29,7 +30,7 @@ def process_text(text):
 
 st.title("Chat with your PDF 💬")
 
-openai_api_key = st.secrets["openai"]["OPENAI_API_KEY"]
+
 
 pdf = st.file_uploader('Upload your PDF Document', type='pdf')
 
