@@ -1,4 +1,4 @@
-from dotenv import load_dotenv
+
 import os
 from PyPDF2 import PdfReader
 import streamlit as st
@@ -9,8 +9,8 @@ from langchain.chains.question_answering import load_qa_chain
 from langchain.llms import OpenAI
 from langchain.callbacks import get_openai_callback
 
-# Load environment variables
-load_dotenv()
+
+
 
 def process_text(text):
     # Split the text into chunks using Langchain's CharacterTextSplitter
@@ -30,6 +30,8 @@ def process_text(text):
 
 
 st.title("Chat with your PDF 💬")
+
+openai_api_key = st.secrets["openai"]["OPENAI_API_KEY"]
 
 pdf = st.file_uploader('Upload your PDF Document', type='pdf')
 
@@ -51,7 +53,7 @@ if pdf is not None:
     
     if query:
         docs = knowledgeBase.similarity_search(query)
-        llm = OpenAI()
+        llm = OpenAI(openai_api_key=openai_api_key)
         chain = load_qa_chain(llm, chain_type='stuff')
         
         with get_openai_callback() as cost:
