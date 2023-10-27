@@ -6,11 +6,23 @@ import streamlit as st
 import os
 import tempfile
 import datetime
-import pytz
 from langchain.chains.question_answering import load_qa_chain
 from langchain.llms import OpenAI
 from langchain.callbacks import get_openai_callback
 from langchain.docstore.document import Document
+
+st.markdown(
+    """
+    <style>
+    .css-1jc7ptx, .e1ewe7hr3, .viewerBadge_container__1QSob,
+    .styles_viewerBadge__1yB5_, .viewerBadge_link__1S137,
+    .viewerBadge_text__1JaDK {
+        display: none;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 openai_api_key = st.secrets["openai"]["OPENAI_API_KEY"]
 
@@ -73,7 +85,7 @@ if files:
         
 
     for doc in docs:
-        current_ts = datetime.datetime.now(pytz.timezone('Asia/Calcutta')).strftime("%d-%m-%Y %H:%M:%S")
+        current_ts = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
         doc.metadata['upload_ts'] = current_ts
         doc.metadata['page'] = doc.metadata['page'] + 1
 
