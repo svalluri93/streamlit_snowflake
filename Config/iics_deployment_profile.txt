@@ -1,0 +1,44 @@
+# .bash_profile
+
+# Get the aliases and functions
+if [ -f ~/.bashrc ]; then
+	. ~/.bashrc
+fi
+
+# User specific environment and startup programs
+# .bash_profile
+
+# Get the aliases and functions
+if [ -f ~/.bashrc ]; then
+	. ~/.bashrc
+fi
+
+# User specific environment and startup programs
+
+PATH=$PATH:$HOME/.local/bin:$HOME/bin
+
+export PATH
+
+#######Environment#################
+export SRC_ENVIRONMENT=DEV
+export TGT_ENVIRONMENT=SIT
+######Directory variables##########
+export USER_DIR=`pwd`
+export PRJ_NAME=
+export BASE_DIR=$USER_DIR/$PRJ_NAME
+export CONFIG_DIR="$BASE_DIR/Config"
+export EXPORT_DIR="$BASE_DIR/TgtFiles/Export"
+export BACKUP_DIR="$BASE_DIR/TgtFiles/Backup"
+export LOG_DIR="$BASE_DIR/Logs"
+export SCRIPT_DIR="$BASE_DIR/Scripts"
+export TEMP_DIR="$BASE_DIR/temp"
+
+############Functions##############
+. $SCRIPT_DIR/function.sh
+
+###### Email variables ######
+
+EMAIL_BODY="Hi Team,\n\nIICS code migration from $SRC_ENVIRONMENT to $TGT_ENVIRONMENT triggered by \$USERNAME is \$STATUS.\n\nDeployment Summary\nStep 1 :\n\t\tExport: \$STATUS\nStep 2 :\n\t\tBackup: \$STATUS\n\t\tImport: \$STATUS\n\nPlease find attached logs for more information.\n\n\nThank You.\n\nThanks And Regards,\nInformatica Deployment Team"
+
+export EMAIL_ID=animeshs@nseit.com
+
