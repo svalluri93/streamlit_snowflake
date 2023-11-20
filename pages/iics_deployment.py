@@ -9,7 +9,6 @@ import uuid
 
 st.title('IICS Codeploy')
 
-st.write(os.environ)
 
 def follow(thefile):
     '''generator function that yields new lines in a file
