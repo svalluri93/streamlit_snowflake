@@ -45,19 +45,19 @@ if uploaded_file is not None:
 
     dataframe = pd.read_csv(uploaded_file)
     #st.write(dataframe)
-    dataframe.to_csv('../Config/deployment_template_' + uuid + '.txt', index = False, quotechar = '"')
+    dataframe.to_csv('./Config/deployment_template_' + uuid + '.txt', index = False, quotechar = '"')
 
 src_usernm_inp = st.text_input('Provide source org username..')
 src_pwd_inp = st.text_input(label = 'Provide source org password..', type = "password")
 is_src_tgt_creds_same = st.text_input('Is Source and Target same? [Y/N]')
 
-log_file_name = "../Logs/iics_code_deployment_" + src_usernm_inp + "_" + uuid + ".log"
+log_file_name = "./Logs/iics_code_deployment_" + src_usernm_inp + "_" + uuid + ".log"
 
 if is_src_tgt_creds_same == 'N':
     tgt_usernm_inp = st.text_input('Provide target org username..')
     tgt_pwd_inp = st.text_input(label = 'Provide target org password..', type = "password")
     if st.button('Start Deployment', type="primary"):
-        shell_cmd_to_run = "sh ../Scripts/iics_code_deployment_streamlit.sh " + src_usernm_inp + " " + src_pwd_inp + " " + tgt_usernm_inp + " " + tgt_pwd_inp + " " + uuid + " &"
+        shell_cmd_to_run = "sh ./Scripts/iics_code_deployment_streamlit.sh " + src_usernm_inp + " " + src_pwd_inp + " " + tgt_usernm_inp + " " + tgt_pwd_inp + " " + uuid + " &"
         st.write('Deployment begins')
         #print(sp.run([shell_cmd_to_run], capture_output = True, shell = True))
         print(sp.run(["touch " + log_file_name], shell = True))
@@ -77,7 +77,7 @@ if is_src_tgt_creds_same == 'N':
     else:
         pass
 else:
-    shell_cmd_to_run = "sh ../Scripts/iics_code_deployment_streamlit.sh " + src_usernm_inp + " " + src_pwd_inp + " " + uuid + " &"
+    shell_cmd_to_run = "sh ./Scripts/iics_code_deployment_streamlit.sh " + src_usernm_inp + " " + src_pwd_inp + " " + uuid + " &"
     if st.button('Start Deployment', type="primary"):
         st.write('Deployment begins')
         #print(sp.run([shell_cmd_to_run], capture_output = True, shell = True))
