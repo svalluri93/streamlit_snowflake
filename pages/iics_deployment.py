@@ -113,13 +113,13 @@ else:
                 if line.find('Calling script iics_code_deployment_import_streamlit.sh to take import of IICS objects - Completed')>0:
                     break
             status.update(label="Deployment complete!", state="complete", expanded=False)
-            with open(log_file_name, "r") as file:
-                btn = st.download_button(
-                    label="Download Complete Log",
-                    data=file,
-                    file_name=log_file_name,
-                    mime="text/csv"
-                )   
+        with open(log_file_name, "r") as file:
+            btn = st.download_button(
+                label="Download Complete Log",
+                data=file,
+                file_name=log_file_name,
+                mime="text/csv"
+            )   
         print('completed')
     else:
         pass
