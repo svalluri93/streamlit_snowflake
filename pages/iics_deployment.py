@@ -67,11 +67,24 @@ if is_src_tgt_creds_same == 'N':
         with st.status('Deployment begins..') as status:
             # iterate over the generator
             for line in loglines:
+                if line.find('iics_code_deployment_import_streamlit.sh')>=0:
+                    status.update(label="Importing code", state="running", expanded=False)        
+                elif line.find('iics_code_deployment_export_streamlit.sh')>=0:
+                    status.update(label="Exporting code", state="running", expanded=False) 
+                elif line.find('iics_code_deployment_backup_streamlit.sh')>=0:
+                    status.update(label="Taking backup of code", state="running", expanded=False)
                 st.write(line)
 
                 if line.find('Calling script iics_code_deployment_import_streamlit.sh to take import of IICS objects - Completed')>0:
                     break
             status.update(label="Deployment complete!", state="complete", expanded=False)
+        with open(log_file_name, "r") as file:
+            btn = st.download_button(
+                label="Download Complete Log",
+                data=file,
+                file_name=log_file_name,
+                mime="text/csv"
+            )
         print('completed')
     else:
         pass
@@ -89,11 +102,24 @@ else:
         with st.status('Deployment begins..') as status:
             # iterate over the generator
             for line in loglines:
+                if line.find('iics_code_deployment_import_streamlit.sh')>=0:
+                    status.update(label="Importing code", state="running", expanded=False)        
+                elif line.find('iics_code_deployment_export_streamlit.sh')>=0:
+                    status.update(label="Exporting code", state="running", expanded=False) 
+                elif line.find('iics_code_deployment_backup_streamlit.sh')>=0:
+                    status.update(label="Taking backup of code", state="running", expanded=False)
                 st.write(line)
 
                 if line.find('Calling script iics_code_deployment_import_streamlit.sh to take import of IICS objects - Completed')>0:
                     break
             status.update(label="Deployment complete!", state="complete", expanded=False)
+            with open(log_file_name, "r") as file:
+                btn = st.download_button(
+                    label="Download Complete Log",
+                    data=file,
+                    file_name=log_file_name,
+                    mime="text/csv"
+                )   
         print('completed')
     else:
         pass
