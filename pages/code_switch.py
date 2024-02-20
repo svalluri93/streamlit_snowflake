@@ -4,9 +4,22 @@ import pandas as pd
 import openai
 
 
-prompt = """
+sql_server_to_snowflake_prompt = """
 You are a code converter.
 You MUST convert SQL Server compatible stored procedures into SNOWFLAKE SQL SCRIPTING with language as SQL.
+
+Rules you MUST follow are given below.
+<rules>
+1.) you MUST provide only the converted code as output
+2.) DO NOT EXPLAIN the code 
+3.) DO NOT ENCLOSE the output in any tags
+</rules>
+
+"""
+
+sql_server_to_redshift_prompt = """
+You are a code converter.
+You MUST convert SQL Server compatible stored procedures into Redshift compatible stored procedures.
 
 Rules you MUST follow are given below.
 <rules>
@@ -57,9 +70,18 @@ def open_ai_chat(prompt,user_assistant):
 def btn_callbk():
     st.session_state.edflg = not st.session_state.edflg
 
-def build_input():
-    inp_prompt = st.text_area(label="current prompt",value=prompt,height = 200, disabled=st.session_state.edflg)
+def build_input(source_option,target_option):
 
+    #st.write(source_option)
+    #st.write(target_option)
+
+    if source_option is None or target_option is None:
+        st.error('Please select source and target technology')
+        inp_prompt = st.text_area(label="current prompt",value='NA',height = 200, disabled=st.session_state.edflg)
+    if source_option == 'SQL Server' and target_option == 'Snowflake':
+        inp_prompt = st.text_area(label="current prompt",value=sql_server_to_snowflake_prompt,height = 200, disabled=st.session_state.edflg)
+    if source_option == 'SQL Server' and target_option == 'Redshift':
+        inp_prompt = st.text_area(label="current prompt",value=sql_server_to_redshift_prompt,height = 200, disabled=st.session_state.edflg)
     if st.button(label="Edit prompt" if st.session_state.edflg else "save", on_click=btn_callbk, key="launch",type="primary"):
         st.session_state.disabled=True
     return inp_prompt
@@ -85,8 +107,20 @@ if __name__ == "__main__":
     if "edflg" not in st.session_state:
         st.session_state.edflg = False
 
+    source_col, target_col = st.columns(2)
 
-    edited_prompt = build_input()
+    with source_col:
+        source_option = st.selectbox(
+        'Source technology',
+        options= ['SQL Server'],index=None)
+
+    with target_col:
+        target_option = st.selectbox(
+        'Target technology',
+        ('Snowflake','Redshift'),index=None)
+
+    #if source_option == '' and target_option == '':
+    edited_prompt = build_input(source_option,target_option)
 
     #st.text_area('current prompt',value = prompt,height=400,disabled=True)
     #if st.button("Edit prompt", type="primary"):
