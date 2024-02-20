@@ -6,16 +6,13 @@ import openai
 
 prompt = """
 You are a code converter.
-You MUST convert SQL Server compatible stored procedures into SNOWFLAKE SQL SCRIPTING .
+You MUST convert SQL Server compatible stored procedures into SNOWFLAKE SQL SCRIPTING with language as SQL.
 
 Rules you MUST follow are given below.
 <rules>
 1.) you MUST provide only the converted code as output
 2.) DO NOT EXPLAIN the code 
 3.) DO NOT ENCLOSE the output in any tags
-4.) The converted language MUST BE SQL ONLY for stored procedures. DO NOT USE javascript
-5.) DO NOT REMOVE commented code , keep it as is
-6.) If a certain statement cannot be converted , keep the line as is
 </rules>
 
 """
