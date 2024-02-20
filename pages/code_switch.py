@@ -45,7 +45,7 @@ def open_ai_chat(prompt,user_assistant):
         response = openai.ChatCompletion.create(
                   engine='gpt-4-turbo',
                   messages=msgs,
-                  temperature=0.2,  # Control the randomness of the generated response
+                  temperature=0,  # Control the randomness of the generated response
                   n=1,  # Generate a single response
                   stop=None
                 )
