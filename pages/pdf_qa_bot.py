@@ -50,7 +50,7 @@ def openai_query(texts,query,query_type):
         n_doc =  Document(page_content=doc.page_content, metadata=doc.metadata)
         docs_with_score.append(doc)
 
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0)
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0,openai_api_key = st.secrets["openai"]["OPENAI_API_KEY"])
     chain = load_qa_chain(llm, chain_type='stuff')
         
     with get_openai_callback() as cost:
