@@ -1,7 +1,7 @@
 from langchain.document_loaders import PyPDFLoader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores import FAISS
-from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.embeddings import OpenAIEmbeddings
 import streamlit as st
 import os
 import tempfile
@@ -32,7 +32,7 @@ openai_api_key = st.secrets["openai"]["OPENAI_API_KEY"]
 #@st.cache_data
 def openai_query(splits,query,query_type):
 
-    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key,deployment="text-embedding-3-large")
+    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key,model="text-embedding-3-large")
     vectordb = FAISS.from_documents(splits,embeddings)
     docs = vectordb.similarity_search_with_score(query,k=3)
     docs_with_score = []
