@@ -1,16 +1,21 @@
-from langchain.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import CharacterTextSplitter
-from langchain.vectorstores import FAISS
-from langchain.embeddings import OpenAIEmbeddings
+from langchain_community.vectorstores import FAISS
+#from langchain_openai import OpenAIEmbeddings
+from langchain.embeddings.openai import OpenAIEmbeddings
 import streamlit as st
 import os
 import tempfile
 import datetime
 from langchain.chains.question_answering import load_qa_chain
-from langchain.llms import OpenAI
-from langchain.chat_models import ChatOpenAI
+#from langchain_openai import OpenAI
+from langchain_openai import ChatOpenAI
 from langchain.callbacks import get_openai_callback
 from langchain.docstore.document import Document
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 st.markdown(
     """
@@ -25,15 +30,16 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-openai_api_key = st.secrets["openai"]["OPENAI_API_KEY"]
+#openai_api_key = st.secrets["openai"]["OPENAI_API_KEY"]
 
 #https://stackoverflow.com/questions/64719918/how-to-write-streamlit-uploadedfile-to-temporary-directory-with-original-filenam
 
 #@st.cache_data
-def openai_query(splits,query,query_type):
+def openai_query(texts,query,query_type):
 
-    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key,engine="text-embedding-3-large")
-    vectordb = FAISS.from_documents(splits,embeddings)
+    #embeddings = OpenAIEmbeddings(openai_api_key=st.secrets["openai"]["OPENAI_API_KEY"])
+    embeddings = OpenAIEmbeddings()
+    vectordb = FAISS.from_documents(texts,embeddings)
     docs = vectordb.similarity_search_with_score(query,k=3)
     docs_with_score = []
     for doc, score in docs:
@@ -42,7 +48,7 @@ def openai_query(splits,query,query_type):
         n_doc =  Document(page_content=doc.page_content, metadata=doc.metadata)
         docs_with_score.append(doc)
 
-    llm = OpenAI(openai_api_key=openai_api_key,model_name="gpt-3.5-turbo", temperature=0)
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0)
     chain = load_qa_chain(llm, chain_type='stuff')
         
     with get_openai_callback() as cost:
@@ -90,8 +96,8 @@ if files:
         doc.metadata['upload_ts'] = current_ts
         doc.metadata['page'] = doc.metadata['page'] + 1
 
-    splits = get_chunk_text(docs)
-    splits = docs
+    texts = get_chunk_text(docs)
+    texts = docs
     
 
     option = st.selectbox(
@@ -109,7 +115,7 @@ if files:
     if query:
 
         query_type = 'general'
-        ai_resp,docs_with_score = openai_query(splits,query,query_type)
+        ai_resp,docs_with_score = openai_query(texts,query,query_type)
         st.write(ai_resp)
 
         col1,col2,col3 = st.columns([1,0.5,5])
@@ -124,7 +130,7 @@ if files:
         if tell_more_button:
                 #results = db.query(query_texts=[query],n_results=1)
             query_type = 'detailed'
-            response,docs_with_score = openai_query(splits,query,query_type)
+            response,docs_with_score = openai_query(texts,query,query_type)
             st.write(response)
 
         tab_labels = []
