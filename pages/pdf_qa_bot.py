@@ -8,6 +8,7 @@ import tempfile
 import datetime
 from langchain.chains.question_answering import load_qa_chain
 from langchain.llms import OpenAI
+from langchain.chat_models import ChatOpenAI
 from langchain.callbacks import get_openai_callback
 from langchain.docstore.document import Document
 
@@ -31,7 +32,7 @@ openai_api_key = st.secrets["openai"]["OPENAI_API_KEY"]
 #@st.cache_data
 def openai_query(splits,query,query_type):
 
-    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
+    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key,model="text-embedding-3-large")
     vectordb = FAISS.from_documents(splits,embeddings)
     docs = vectordb.similarity_search_with_score(query,k=3)
     docs_with_score = []
