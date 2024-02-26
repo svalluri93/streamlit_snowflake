@@ -17,6 +17,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
+
 st.markdown(
     """
     <style>
@@ -30,7 +32,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-#openai_api_key = st.secrets["openai"]["OPENAI_API_KEY"]
+openai_api_key = st.secrets["openai"]["OPENAI_API_KEY"]
 
 #https://stackoverflow.com/questions/64719918/how-to-write-streamlit-uploadedfile-to-temporary-directory-with-original-filenam
 
@@ -38,7 +40,7 @@ st.markdown(
 def openai_query(texts,query,query_type):
 
     #embeddings = OpenAIEmbeddings(openai_api_key=st.secrets["openai"]["OPENAI_API_KEY"])
-    embeddings = OpenAIEmbeddings()
+    embeddings = OpenAIEmbeddings(openai_api_key = st.secrets["openai"]["OPENAI_API_KEY"])
     vectordb = FAISS.from_documents(texts,embeddings)
     docs = vectordb.similarity_search_with_score(query,k=3)
     docs_with_score = []
