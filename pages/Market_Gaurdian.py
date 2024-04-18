@@ -4,17 +4,19 @@ from botocore.exceptions import ClientError
 import json
 from pytube import YouTube
 import os
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 import time,random,string
 import streamlit as st
 import pandas as pd
 
-load_dotenv()
+#load_dotenv()
 
 
-AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+#AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+#AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 
+AWS_ACCESS_KEY_ID = st.secrets["aws_keys"]["AWS_ACCESS_KEY_ID"]
+AWS_SECRET_ACCESS_KEY = st.secrets["aws_keys"]["AWS_SECRET_ACCESS_KEY"]
 
 
 def transcribe_file(bucket_name, file_name):
