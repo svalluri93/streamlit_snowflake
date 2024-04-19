@@ -13,30 +13,29 @@ import tempfile
 #load_dotenv()
 
 
-#AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
-#AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
-
 AWS_ACCESS_KEY_ID = st.secrets["aws_keys"]["AWS_ACCESS_KEY_ID"]
 AWS_SECRET_ACCESS_KEY = st.secrets["aws_keys"]["AWS_SECRET_ACCESS_KEY"]
 
 BUCKET_NAME = 'nseit-media-analytics' 
 
-
-def transcribe_file(bucket_name, file_name):
+def transcribe_file(file_name):
 
     transcribe = boto3.client('transcribe', region_name='ap-south-1', aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
     s3_client = boto3.client('s3',aws_access_key_id=AWS_ACCESS_KEY_ID,aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
     job_name = "transcribe-job-" + str(''.join(random.choices(string.ascii_uppercase + string.digits, k=7)))
     print(job_name)
     media_format = file_name.split('.')[-1]
+    print(media_format)
+    print(file_name)
+    #print('s3://' + BUCKET_NAME + '/' + file_name)
     transcribe.start_transcription_job(
         TranscriptionJobName=job_name,
         Media={
-           'MediaFileUri': 's3://' + bucket_name + '/' + file_name
+           'MediaFileUri': 's3://' + BUCKET_NAME + '/' + file_name
        },
         MediaFormat=media_format,
         LanguageCode="en-US",
-        OutputBucketName=bucket_name
+        OutputBucketName=BUCKET_NAME
     )
 
     max_tries = 60
@@ -70,26 +69,19 @@ def transcribe_file(bucket_name, file_name):
 
 def video_download_upload(video_link):
 
+    s3_client = boto3.client('s3',aws_access_key_id=AWS_ACCESS_KEY_ID,aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+
     print("downloading video")
     video = YouTube(video_link)
     data_stream = video.streams.filter(progressive=True,file_extension = "mp4").first()
-    #details= {}
-    #details["title"]= video.title
-    #video_data = data_stream.download()
+    file_name = data_stream.default_filename
 
     with tempfile.TemporaryDirectory() as tempdirname:
-        
-        data_stream.download()
-        video_file_name = os.path.join(tempdirname, data_stream.default_filename)
-        print(video_file_name)
-        #with st.spinner('uploading the video file to s3...'):
-        file_name = data_stream.default_filename
-    
-        # Initialize the S3 client
-        s3_client = boto3.client('s3',aws_access_key_id=AWS_ACCESS_KEY_ID,aws_secret_access_key=AWS_SECRET_ACCESS_KEY)  
+
+        data_stream.download(output_path=tempdirname)
+        video_file_name = os.path.join(tempdirname, file_name)
 
         try:
-            #s3_client.Bucket(bucket_name).Object(file_name).load()
             s3_client.head_object(Bucket = BUCKET_NAME,Key = file_name)
 
         except botocore.exceptions.ClientError as e:
@@ -97,19 +89,17 @@ def video_download_upload(video_link):
             if e.response['Error']['Code'] == "404":
 
                     try:
-                        response = s3_client.upload_file(file_name, BUCKET_NAME, object_name = file_name)
+                        response = s3_client.upload_file(Filename = video_file_name, Bucket = BUCKET_NAME,Key = file_name)
                         return response
                     except ClientError as e:
-                        # Handle any errors that occurred during the upload
                         print(f"Error uploading file '{file_name}' to bucket '{BUCKET_NAME}': {e}")
                         return False
 
             else:
-            # Something else has gone wrong.
                 raise (e)
         else:
             print('file already exists')
-        
+
     return file_name
 
 def bdrck_compltn(prompt):
@@ -158,7 +148,9 @@ def bdrck_compltn(prompt):
 
 if __name__ == "__main__":
 
-    st.header('Market Gaurdian', divider='rainbow')
+    
+
+    st.header('Market Guardian', divider='rainbow')
     video_url = st.text_input('Youtube URL','paste link here')
     if video_url == 'paste link here' or video_url == '':
         exit(0)
@@ -171,12 +163,8 @@ if __name__ == "__main__":
         with st.spinner('downloading the video file and uploading to s3...'):
             video_file_name = video_download_upload(video_url)
 
-         
-    
-# Up    load the file
-
         with st.spinner('Generating the transcription...'):
-            transcript_text = transcribe_file(BUCKET_NAME, video_file_name)
+            transcript_text = transcribe_file(video_file_name)
 
         with st.expander("Video Transcription"):
             st.write(transcript_text)
