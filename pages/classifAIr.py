@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import openai
+from openai import OpenAI
 import csv
 import pandas
 import os
@@ -10,7 +10,11 @@ import time
 import random
 
 
-openai.api_key = st.secrets["openai"]["OPENAI_API_KEY"]
+#openai.api_key = st.secrets["openai"]["OPENAI_API_KEY"]
+
+client = OpenAI(
+  api_key=st.secrets["openai"]["OPENAI_API_KEY"],  # this is also the default, it can be omitted
+)
 
 def chat(system, user_assistant):
     assert isinstance(system, str), "`system` should be a string"
@@ -23,21 +27,22 @@ def chat(system, user_assistant):
     msgs = system_msg + user_assistant_msgs
   #for delay_secs in (2**x for x in range(0, 6)):
     try:
-        response = openai.ChatCompletion.create(model="gpt-3.5-turbo",
+        completion = client.chat.completions.create(model="gpt-4o",
                                           messages=msgs,
                                           temperature=0,  # Control the randomness of the generated response
                                           n=1,  # Generate a single response
                                           stop=None )
-    except openai.OpenAIError as e:
-        st.error("OpenAI server is overloaded. Please try after sometime.")
+    except client.OpenAIError as e:
+        st.error(f"Error: {e}. OpenAI server is overloaded. Please try after sometime.")
     #    randomness_collision_avoidance = random.randint(0, 1000) / 1000.0
     #    sleep_dur = delay_secs + randomness_collision_avoidance
     #    print(f"Error: {e}. Retrying in {round(sleep_dur, 2)} seconds.")
     #    time.sleep(sleep_dur)
     #    continue
-    status_code = response["choices"][0]["finish_reason"]
-    assert status_code == "stop", f"The status code was {status_code}."
-    return response["choices"][0]["message"]["content"]
+    #status_code = response["choices"][0]["finish_reason"]
+    #assert status_code == "stop", f"The status code was {status_code}."
+    #return response["choices"][0]["message"]["content"]
+    return completion.choices[0].message.content 
 
 def pii_redact(input):
 
