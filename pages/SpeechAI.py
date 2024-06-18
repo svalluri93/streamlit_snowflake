@@ -1,17 +1,22 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
-import openai
+from openai import OpenAI
+
+client = OpenAI(
+  api_key=st.secrets["openai"]["OPENAI_API_KEY"],  # this is also the default, it can be omitted
+)
 
 
 def auido_to_text(audio):
-    openai.api_key = st.secrets["openai"]["OPENAI_API_KEY"]
-    result = openai.Audio.transcribe("whisper-1", audio, verbose=True)
+    #openai.api_key = st.secrets["openai"]["OPENAI_API_KEY"]
+    #result = openai.Audio.transcribe("whisper-1", audio, verbose=True)
+    result = client.audio.transcriptions.create(model="whisper-1",file=audio)
     return result
 
 
 def video_to_text(video):
-    openai.api_key = st.secrets["openai"]["OPENAI_API_KEY"]
-    result = openai.Audio.transcribe("whisper-1", video, verbose=True)
+    
+    result = client.audio.transcriptions.create(model="whisper-1",file=video)
     return result
 
 
@@ -50,9 +55,9 @@ elif selected == 'Audio':
         with st.spinner("Converting audio to speech...."):
             result = auido_to_text(audio)
         with st.container():
-            st.write(result['text'])
+            st.write(result.text)
             st.download_button(
-                'Download the result as text file', result['text']
+                'Download the result as text file', result.text
             )
 elif selected == 'Video':
     st.empty()
@@ -61,7 +66,7 @@ elif selected == 'Video':
         with st.spinner("Converting video to speech...."):
             result = video_to_text(video)
         with st.container():
-            st.write(result['text'])
+            st.write(result.text)
             st.download_button(
-                'Download the result as text file', result['text']
+                'Download the result as text file', result.text
             )

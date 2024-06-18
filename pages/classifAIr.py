@@ -33,7 +33,7 @@ def chat(system, user_assistant):
                                           n=1,  # Generate a single response
                                           stop=None )
     except client.OpenAIError as e:
-        st.error(f"Error: {e}. OpenAI server is overloaded. Please try after sometime.")
+        st.error(f"Error: {e}.")
     #    randomness_collision_avoidance = random.randint(0, 1000) / 1000.0
     #    sleep_dur = delay_secs + randomness_collision_avoidance
     #    print(f"Error: {e}. Retrying in {round(sleep_dur, 2)} seconds.")
