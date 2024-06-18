@@ -3,6 +3,13 @@ import streamlit as st
 import pandas as pd
 import openai
 
+from openai import AzureOpenAI
+
+client = AzureOpenAI(
+  azure_endpoint = st.secrets["azure_openai"]["AZURE_OPENAI_ENDPOINT"], 
+  api_key=st.secrets["azure_openai"]["AZURE_OPENAI_KEY"],  
+  api_version="2024-02-15-preview"
+)
 
 sql_server_to_snowflake_prompt = """
 You are a code converter.
@@ -34,13 +41,13 @@ Rules you MUST follow are given below.
 def open_ai_chat(prompt,user_assistant):
 
     # This is set to `azure`
-    openai.api_type = 'azure'
+    #openai.api_type = 'azure'
     # The API key for your Azure OpenAI resource.
-    openai.api_key = st.secrets["azure_openai"]["AZURE_OPENAI_KEY"]
+    #openai.api_key = st.secrets["azure_openai"]["AZURE_OPENAI_KEY"]
     # The base URL for your Azure OpenAI resource. e.g. "https://<your resource name>.openai.azure.com"
-    openai.api_base = st.secrets["azure_openai"]["AZURE_OPENAI_ENDPOINT"]
+    #openai.api_base = st.secrets["azure_openai"]["AZURE_OPENAI_ENDPOINT"]
     # Currently Chat Completion API have the following versions available: 2023-03-15-preview
-    openai.api_version = '2023-05-15'
+    #openai.api_version = '2023-05-15'
     
     assert isinstance(user_assistant, list), "`user_assistant` should be a list"
     system_msg = [{"role": "system", "content": prompt}]
@@ -52,8 +59,8 @@ def open_ai_chat(prompt,user_assistant):
     msgs = system_msg + user_assistant_msgs
 
     try:
-        response = openai.ChatCompletion.create(
-                  engine='gpt-4-turbo',
+        response = client.chat.completions.create(
+                  model='gpt-4o',
                   messages=msgs,
                   temperature=0,  # Control the randomness of the generated response
                   n=1,  # Generate a single response
@@ -61,9 +68,33 @@ def open_ai_chat(prompt,user_assistant):
                 )
     
 
-        return response['choices'][0]['message']['content']
+        return response.choices[0].message.content
     
-    except openai.OpenAIError as e:
+    except openai.AuthenticationError as e:
+        # Handle Authentication error here, e.g. invalid API key
+        print(f"OpenAI API returned an Authentication Error: {e}")
+
+    except openai.APIConnectionError as e:
+        # Handle connection error here
+        print(f"Failed to connect to OpenAI API: {e}")
+
+    except openai.BadRequestError as e:
+        # Handle connection error here
+        print(f"Invalid Request Error: {e}")
+
+    except openai.RateLimitError as e:
+        # Handle rate limit error
+        print(f"OpenAI API request exceeded rate limit: {e}")
+
+    except openai.InternalServerError as e:
+        # Handle Service Unavailable error
+        print(f"Service Unavailable: {e}")
+
+    except openai.APITimeoutError as e:
+        # Handle request timeout
+        print(f"Request timed out: {e}")
+
+    except openai.APIError as e:
         # Handle API error here, e.g. retry or log
         print(f"OpenAI API returned an API Error: {e}")
 
