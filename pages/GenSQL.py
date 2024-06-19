@@ -1,8 +1,9 @@
-import openai
+from openai import OpenAI
 import re
 import streamlit as st
 import pandas as pd
 
+conn = st.connection("snowflake")
 
 GEN_SQL = """
 You will be acting as an AI Snowflake SQL expert named GenSQL.
@@ -38,10 +39,11 @@ Now to get started, please briefly introduce yourself, show the list of tables a
 """
 
 @st.cache_data(show_spinner=False)
-def get_cols():
+def get_cols(_session):
 
-    session = st.experimental_connection("snowpark").session
-    table_names = pd.DataFrame(session.sql(f"""
+    
+    
+    table_names = pd.DataFrame(_session.sql(f"""
         SELECT DISTINCT TABLE_NAME FROM ML_APP.INFORMATION_SCHEMA.COLUMNS
         Where TABLE_SCHEMA <> 'INFORMATION_SCHEMA'
         ORDER BY TABLE_NAME;
@@ -56,8 +58,8 @@ def get_cols():
 
     op = "Tables are given below : \n"
     for j in tables:
-        session = st.experimental_connection("snowpark").session
-        columns = pd.DataFrame(session.sql(f"""
+        
+        columns = pd.DataFrame(_session.sql(f"""
         SELECT COLUMN_NAME FROM ML_APP.INFORMATION_SCHEMA.COLUMNS
         Where TABLE_NAME ='{j}';
         """,
@@ -79,11 +81,15 @@ if __name__ == "__main__":
     st.title("SQL Generator")
 
     # Initialize the chat messages history
-    openai.api_key = st.secrets["openai"]["OPENAI_API_KEY"]
+    #openai.api_key = st.secrets["openai"]["OPENAI_API_KEY"]
+
+    session = conn.session()
+
+    client = OpenAI(api_key=st.secrets["openai"]["OPENAI_API_KEY"] )
     if "messages" not in st.session_state:
         # system prompt includes table information, rules, and prompts the LLM to produce
         # a welcome message to the user.
-        st.session_state.messages = [{"role": "system", "content": get_cols()}]
+        st.session_state.messages = [{"role": "system", "content": get_cols(session)}]
 
     # Prompt for user input and save
     if prompt := st.chat_input():
@@ -103,20 +109,33 @@ if __name__ == "__main__":
         with st.chat_message("assistant"):
             response = ""
             resp_container = st.empty()
-            for delta in openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
+            for chunk in client.chat.completions.create(
+                model="gpt-4o",
                 messages=[{"role": m["role"], "content": m["content"]} for m in st.session_state.messages],
                 stream=True,
             ):
-                response += delta.choices[0].delta.get("content", "")
-                resp_container.markdown(response)
+                #response += delta.choices[0].delta.get("content", "")
+                if chunk.choices[0].delta.content is not None:
+                    response += chunk.choices[0].delta.content
+                    resp_container.markdown(response)
+
+            #response = client.chat.completions.create(
+            #    model="gpt-4o",
+            #    messages=[{"role": m["role"], "content": m["content"]} for m in st.session_state.messages],
+            #    stream=True,
+            #)
+#
+            #for chunk in response:
+            #    #print(chunk)
+            #    response += chunk.choices[0].delta.content
+            #    resp_container.markdown(response)
+            #    #print(chunk.choices[0].delta.content)
 
             message = {"role": "assistant", "content": response}
             # Parse the response for a SQL query and execute if available
             sql_match = re.search(r"```sql\n(.*)\n```", response, re.DOTALL)
             if sql_match:
                 sql = sql_match.group(1)
-                session = st.experimental_connection("snowpark").session
                 message["results"] = pd.DataFrame(session.sql(sql).collect())
                 st.dataframe(message["results"])
                 st.session_state["GenSQL_op_df"] = message["results"]

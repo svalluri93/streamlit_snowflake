@@ -1,23 +1,23 @@
 import pandas as pd
-import openai
+from openai import OpenAI
 import streamlit as st
 import warnings
 
 
 def run_request(question_to_ask, model_type):
-    if model_type == "gpt-4":
+    if model_type == "gpt-4o":
         task = "Generate Python Code Script. The script should only include code, no comments."
     elif model_type == "gpt-3.5-turbo":
         task = "Generate Python Code Script."
-    if model_type == "gpt-4" or model_type == "gpt-3.5-turbo":
+    if model_type == "gpt-4o" or model_type == "gpt-3.5-turbo":
         # Run ChatGPT API
-        openai.api_key = st.secrets["openai"]["OPENAI_API_KEY"]
-        response = openai.ChatCompletion.create(
+        client = OpenAI(api_key=st.secrets["openai"]["OPENAI_API_KEY"] )
+        response = client.chat.completions.create(
             model=model_type,
             messages=[
                 {"role":"system","content":task},
                 {"role":"user","content":question_to_ask}])
-        res = response["choices"][0]["message"]["content"]
+        res = response.choices[0].message.content
 
     # rejig the response
 
@@ -109,7 +109,7 @@ def main():
         try:
             # Run the question
             answer=""
-            answer = run_request(question_to_ask, "gpt-3.5-turbo")
+            answer = run_request(question_to_ask, "gpt-4o")
             # the answer is the completed Python script so add to the beginning of the script to it.
             answer = primer2 + answer
             plot_area = st.empty()
