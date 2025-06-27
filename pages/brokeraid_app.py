@@ -2,7 +2,7 @@ import streamlit as st
 
 def main():
     
-    url = "https://development.d3n87cvz43vtnc.amplifyapp.com/"
+    url = "https://development.d22vfmkk0scefb.amplifyapp.com/"
     st.write("check out this [link](%s)" % url)
 
 
